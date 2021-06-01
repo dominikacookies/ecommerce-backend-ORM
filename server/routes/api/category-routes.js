@@ -23,8 +23,8 @@ router.get('/:id', async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id, { 
       include: [{
-            model: Product,
-            as: 'products'
+        model: Product,
+        as: 'products'
       }]
     });
     if (!category) {
@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
       category: newCategory,
     })
   } catch (error) {
-    res.status(500).json({error: "Sorry, e were unable to create a new category at this time. Please try again later."})
+    res.status(500).json({error: "Sorry, we were unable to create a new category at this time. Please try again later."})
   }
 });
 
