@@ -39,8 +39,9 @@ Product.init(
       references: {
         model: "category",
         key: "id",
-        unique: false,
-      }
+      },
+      onDelete: "cascade",
+      onUpdate: "cascade"
     }
   },
   {
