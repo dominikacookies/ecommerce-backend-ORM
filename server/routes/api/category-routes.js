@@ -19,18 +19,36 @@ router.get('/', async (req, res) => {
   }
 });
 
-// const travellerData = await Traveller.findByPk(req.params.id, {
-//   // JOIN with locations, using the Trip through table
-//   include: [{ model: Location, through: Trip, as: 'planned_trips' }]
-// });
-
-router.get('/:id', (req, res) => {
-  // find one category by its `id` value
-  // be sure to include its associated Products
+router.get('/:id', async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id, { 
+      include: [{
+            model: Product,
+            as: 'products'
+      }]
+    });
+    if (!category) {
+      res.status(404).json({error: "No category found with this id"})
+    }
+    res.status(200).json(category);
+  } catch (error) {
+    res.status(500).json({
+      error: "Sorry, we couldn't get your category information at this time"
+    })
+  }
 });
 
-router.post('/', (req, res) => {
-  // create a new category
+// create a new category
+router.post('/', async (req, res) => {
+  try {
+    const newCategory = await Category.create(req.body);
+    res.status(200).json({
+      message: "A new category has been successfully created",
+      category: newCategory,
+    })
+  } catch (error) {
+    console.log(error)
+  }
 });
 
 router.put('/:id', (req, res) => {
