@@ -39,6 +39,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // create a new category
+// TO DO: destructure response to check category name exists before making request
 router.post('/', async (req, res) => {
   try {
     const newCategory = await Category.create(req.body);
@@ -47,16 +48,35 @@ router.post('/', async (req, res) => {
       category: newCategory,
     })
   } catch (error) {
-    console.log(error)
+    res.status(500).json({error: "Sorry, e were unable to create a new category at this time. Please try again later."})
   }
 });
 
+// update a category by its `id` value
 router.put('/:id', (req, res) => {
-  // update a category by its `id` value
 });
 
-router.delete('/:id', (req, res) => {
   // delete a category by its `id` value
+router.delete('/:id', async (req, res) => {
+  try {
+    const categoryData = await Category.destroy({
+      where: { id : req.params.id}
+    });
+
+    if (!categoryData) {
+      res.status(404).json({message: "We couldn't find a category with this ID"});
+    };
+
+    res.status(200).json({
+      message: "The category has been successfully deleted",
+      available_categories: categoryData
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      message: "We were unable to delete the category at this time. Please try again later."
+    }) 
+  }
 });
 
 module.exports = router;
