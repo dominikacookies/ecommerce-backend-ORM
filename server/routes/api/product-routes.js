@@ -132,8 +132,22 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
-  // delete one product by its `id` value
+// delete one product by its `id` value
+router.delete('/:id', async (req, res) => {
+  try {
+    await Product.destroy({
+      where: { id : req.params.id}
+    });
+
+    res.status(200).json({
+      message: "The category has been successfully deleted",
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      message: "We were unable to delete the product at this time. Please try again later."
+    }) 
+  }
 });
 
 module.exports = router;
