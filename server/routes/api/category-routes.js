@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { Category, Product, ProductTag } = require('../../models');
+const { Category, Product} = require('../../models');
 
 // The `/api/categories` endpoint
 
@@ -53,7 +53,19 @@ router.post('/', async (req, res) => {
 });
 
 // update a category by its `id` value
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
+  try {
+    const {category_name} = req.body
+    await Category.update( {category_name}, {
+      where: {
+        id: req.params.id,
+      },
+    })
+    res.status(200).json({message: "successfully updated category"})
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({error: "Sorry, we couldn't update your category at this time"})
+  }
 });
 
   // delete a category by its `id` value
