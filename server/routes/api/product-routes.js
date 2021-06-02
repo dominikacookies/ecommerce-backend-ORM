@@ -29,8 +29,6 @@ router.get('/', async (req, res) => {
 
 // get one product
 router.get('/:id', async (req, res) => {
-  // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
   try {
     const product = await Product.findByPk(req.params.id, { 
       include: [{
@@ -40,8 +38,7 @@ router.get('/:id', async (req, res) => {
       {
         model: Tag,
         as: 'tags',
-      }
-    ]
+      }]
     });
     if (!product) {
       res.status(404).json({error: "No product found with this id"})
@@ -53,35 +50,44 @@ router.get('/:id', async (req, res) => {
 });
 
 // create new product
-router.post('/', (req, res) => {
-  /* req.body should look like this...
-    {
-      product_name: "Basketball",
-      price: 200.00,
-      stock: 3,
-      tagIds: [1, 2, 3, 4]
+router.post('/', async (req, res) => {
+  try {
+    const {product_name, price, stock, tagIds} = req.body
+    if (!product_name || !price || !stock) {
+      res.status(400).json({message: "Required key value pair missing. Ensure to include: product name, price and stock information in your request."})
     }
-  */
-  Product.create(req.body)
-    .then((product) => {
-      // if there's product tags, we need to create pairings to bulk create in the ProductTag model
-      if (req.body.tagIds.length) {
+
+    newProduct = await Product.create({
+      product_name,
+      price,
+      stock,
+    })
+
+    if (tagIds.length) {
+      try {
         const productTagIdArr = req.body.tagIds.map((tag_id) => {
           return {
-            product_id: product.id,
+            product_id: newProduct.id,
             tag_id,
           };
         });
-        return ProductTag.bulkCreate(productTagIdArr);
+        await ProductTag.bulkCreate(productTagIdArr);
+        res.status(200).json({
+          message: "Your product has been successfully created", 
+          product: newProduct
+        })
+      } catch (error) {
+        res.status(500).json("Sorry, we were unable to add your product tags. Please try again later")
       }
-      // if no product tags, just respond
-      res.status(200).json(product);
+    }
+    res.status(200).json({
+      message: "Your product has been successfully created", 
+      product: newProduct
     })
-    .then((productTagIds) => res.status(200).json(productTagIds))
-    .catch((err) => {
-      console.log(err);
-      res.status(400).json(err);
-    });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({error: "Sorry, we couldn't create your product at this time."})
+  }
 });
 
 // update product
