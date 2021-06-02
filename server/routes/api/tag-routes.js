@@ -35,7 +35,7 @@ router.get('/:id', async (req, res) => {
     if (!tag) {
       res.status(404).json({error: "No tag found with this id"})
     }
-    res.status(200).json(product);
+    res.status(200).json(tag);
   } catch (error) {
     console.log(error)
     res.status(500).json({ error: "Sorry, we couldn't get your tag information at this time"})
