@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
     const newTag = await Tag.create(req.body);
     res.status(200).json({
       message: "A new tag has been successfully created",
-      category: newTag,
+      tag: newTag,
     })
   } catch (error) {
     res.status(500).json({error: "Sorry, we were unable to create a new tag at this time. Please try again later."})
