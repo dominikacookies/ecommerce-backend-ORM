@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
                 }]
     })
 
-    if (!allTags) {
+    if (!allTags.length) {
       return res.status(404).json({ 
         error: "There are no tags at the moment."
       })

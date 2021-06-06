@@ -12,7 +12,9 @@ router.get('/', async (req, res) => {
       }]
     });
 
-    if (!categoryData) {
+    console.log(categoryData)
+
+    if (!categoryData.length) {
       return res.status(404).json({
         error: "No categories found"
       });

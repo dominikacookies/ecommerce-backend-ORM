@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
                   through: ProductTag
                 }]
     })
-    if (!allProducts) {
+    if (!allProducts.length) {
       return res.status(404).json({ 
         error: "No products found"
       });
