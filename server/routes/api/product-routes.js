@@ -19,11 +19,14 @@ router.get('/', async (req, res) => {
                 }]
     })
     if (!allProducts) {
-      res.status(404).json({ message: "There are no products at the moment."})
-    }
-    res.status(200).json(allProducts)
+      return res.status(404).json({ 
+        error: "No products found"
+      });
+    };
+    
+    return res.status(200).json(allProducts);
+
   } catch (error) {
-    console.log(error)
     res.status(500).json({error: "Sorry we couldn't get all product information at this time. Please try again later."})
   }
 });
@@ -41,12 +44,19 @@ router.get('/:id', async (req, res) => {
         as: 'tags',
       }]
     });
+
     if (!product) {
-      res.status(404).json({error: "No product found with this id"})
+      return res.status(404).json({
+        error: "No product found with this id"
+      })
     }
-    res.status(200).json(product);
+
+    return res.status(200).json(product);
+
   } catch (error) {
-    res.status(500).json({ error: "Sorry, we couldn't get your product information at this time"})
+    return res.status(500).json({ 
+      error: "Sorry, we couldn't get your product information at this time"
+    })
   }
 });
 
@@ -54,8 +64,12 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const {product_name, price, stock, tagIds} = req.body
+
     if (!product_name || !price || !stock) {
-      res.status(400).json({message: "Required key value pair missing. Ensure to include: product name, price and stock information in your request."})
+      return res.status(400).json({
+        error: "Values undefined",
+        message: "Please provide a product name, price and stock information."
+      })
     }
 
     newProduct = await Product.create({
@@ -72,34 +86,48 @@ router.post('/', async (req, res) => {
             tag_id,
           };
         });
+
         await ProductTag.bulkCreate(productTagIdArr);
-        res.status(200).json({
+
+        return res.status(200).json({
           message: "Your product has been successfully created", 
           product: newProduct
-        })
+        });
       } catch (error) {
-        res.status(500).json("Sorry, we were unable to add your product tags. Please try again later")
+        return res.status(500).json({
+          error: "Sorry, we were unable to add your product tags. Please try again later"
+        })
       }
     }
-    res.status(200).json({
+
+    return res.status(200).json({
       message: "Your product has been successfully created", 
       product: newProduct
     })
   } catch (error) {
-    console.log(error)
-    res.status(500).json({error: "Sorry, we couldn't create your product at this time."})
+    return res.status(500).json({
+      error: "Sorry, we couldn't create your product at this time."
+    })
   }
 });
 
 // update product
 router.put('/:id', async (req, res) => {
   try {
-      // update product data
-    await Product.update(req.body, {
+    // update product data
+    const updateResult = await Product.update(req.body, {
       where: {
         id: req.params.id,
       },
     })
+
+    console.log(updateResult)
+
+    if (updateResult[0] == 0) {
+      return res.status(404).json({
+        error: "Product doesn't exist"
+      })
+    };
 
     if (req.body.tag_id) {
       try {
@@ -119,38 +147,50 @@ router.put('/:id', async (req, res) => {
         .filter(({ tag_id }) => !req.body.tag_id.includes(tag_id))
         .map(({ id }) => id);
     
-        await ProductTag.destroy({ where: { id: productTagsToRemove } }),
-        await ProductTag.bulkCreate(newProductTags),
-        res.status(200).json({message: "Product has been successfully updated"})
+        await ProductTag.destroy({ where: { id: productTagsToRemove } });
+        await ProductTag.bulkCreate(newProductTags);
+
+        return res.status(200).json({
+          message: "Product has been successfully updated"
+        });
+
       } catch (error) {
-        console.log(error)
-        res.status(500).json({error: "Sorry we couldn't update your product tags at this time."})
+        return res.status(500).json({
+          error: "Sorry we couldn't update your product tags at this time."
+        })
       }
     }
     
-    res.status(200).json({message: "Product has been successfully updated"})
+    return res.status(200).json({
+      message: "Product has been successfully updated"
+    })
 
   } catch (error) {
-    console.log(error)
-    res.status(500).json({error: "Sorry we couldn't update your product at this time."})
-  }
-  
-
+    return res.status(500).json({
+      error: "Sorry we couldn't update your product at this time."
+    })
+  } 
 });
 
 // delete one product by its `id` value
 router.delete('/:id', async (req, res) => {
   try {
-    await Product.destroy({
+    const deleteResult = await Product.destroy({
       where: { id : req.params.id}
     });
 
-    res.status(200).json({
-      message: "The category has been successfully deleted",
+    if (deleteResult === 0) {
+      return res.status(404).json({
+        error: "Product doesn't exist"
+      })
+    };
+
+    return res.status(200).json({
+      message: "The product has been successfully deleted",
     })
   } catch (error) {
-    res.status(500).json({
-      message: "We were unable to delete the product at this time. Please try again later."
+    return res.status(500).json({
+      error: "We were unable to delete the product at this time. Please try again later."
     }) 
   }
 });

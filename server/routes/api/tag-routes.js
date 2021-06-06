@@ -13,13 +13,19 @@ router.get('/', async (req, res) => {
                   through: ProductTag
                 }]
     })
+
     if (!allTags) {
-      res.status(404).json({ message: "There are no tags at the moment."})
+      return res.status(404).json({ 
+        error: "There are no tags at the moment."
+      })
     }
-    res.status(200).json(allTags)
+
+    return res.status(200).json(allTags)
+
   } catch (error) {
-    console.log(error)
-    res.status(500).json({error: "Sorry we couldn't get all tag information at this time. Please try again later."})
+    return res.status(500).json({
+      error: "Sorry we couldn't get all tag information at this time. Please try again later."
+    })
   }
 });
 
@@ -32,12 +38,14 @@ router.get('/:id', async (req, res) => {
         as: 'products',
       }]
     });
+
     if (!tag) {
       res.status(404).json({error: "No tag found with this id"})
     }
+
     res.status(200).json(tag);
+
   } catch (error) {
-    console.log(error)
     res.status(500).json({ error: "Sorry, we couldn't get your tag information at this time"})
   }
 });
@@ -45,13 +53,25 @@ router.get('/:id', async (req, res) => {
 // create a new tag
 router.post('/', async (req, res) => {
   try {
-    const newTag = await Tag.create(req.body);
-    res.status(200).json({
+    const {tag_name} = req.body
+
+    if (!tag_name) {
+      return res.status(400).json({
+        error: "Values undefined",
+        message: "Please provide a tag name."
+      })
+    }
+
+    const newTag = await Tag.create({tag_name});
+
+    return res.status(200).json({
       message: "A new tag has been successfully created",
       tag: newTag,
     })
   } catch (error) {
-    res.status(500).json({error: "Sorry, we were unable to create a new tag at this time. Please try again later."})
+    return res.status(500).json({
+      error: "Sorry, we were unable to create a new tag at this time. Please try again later."
+    })
   }
 });
 
@@ -59,30 +79,56 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const {tag_name} = req.body
-    await Tag.update( {tag_name}, {
+
+    if (!tag_name) {
+      return res.status(400).json({
+        error: "Values undefined",
+        message: "Please provide a tag name."
+      })
+    }
+
+    const updateResult = await Tag.update( {tag_name}, {
       where: {
         id: req.params.id,
       },
     })
-    res.status(200).json({message: "successfully updated tag"})
+
+    if (updateResult[0] == 0) {
+      return res.status(404).json({
+        error: "Tag doesn't exist"
+      })
+    };
+
+    return res.status(200).json({
+      message: "successfully updated tag"
+    })
+
   } catch (error) {
-    res.status(500).json({error: "Sorry, we couldn't update your tag at this time"})
+    return res.status(500).json({
+      error: "Sorry, we couldn't update your tag at this time"
+    })
   }
 });
 
 // delete on tag by its `id` value
 router.delete('/:id', async (req, res) => {
   try {
-    await Tag.destroy({
+    const deleteResult = await Tag.destroy({
       where: { id : req.params.id}
     });
 
-    res.status(200).json({
+    if (deleteResult === 0) {
+      return res.status(404).json({
+        error: "Tag doesn't exist"
+      })
+    };
+
+    return res.status(200).json({
       message: "The tag has been successfully deleted",
     })
   } catch (error) {
-    res.status(500).json({
-      message: "We were unable to delete the tag at this time. Please try again later."
+    return res.status(500).json({
+      error: "We were unable to delete the tag at this time. Please try again later."
     }) 
   }
 });
