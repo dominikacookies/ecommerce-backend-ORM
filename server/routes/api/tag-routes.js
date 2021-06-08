@@ -117,7 +117,7 @@ router.delete('/:id', async (req, res) => {
       where: { id : req.params.id}
     });
 
-    if (deleteResult === 0) {
+    if (!deleteResult) {
       return res.status(404).json({
         error: "Tag doesn't exist"
       })
