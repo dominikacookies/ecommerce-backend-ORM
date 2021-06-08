@@ -121,8 +121,6 @@ router.put('/:id', async (req, res) => {
       },
     })
 
-    console.log(updateResult)
-
     if (updateResult[0] == 0) {
       return res.status(404).json({
         error: "Product doesn't exist"
