@@ -70,10 +70,7 @@ router.post("/", async (req, res) => {
 
     const newTag = await Tag.create({ tag_name });
 
-    return res.status(200).json({
-      message: "A new tag has been successfully created",
-      tag: newTag,
-    });
+    return res.status(200).json(newTag);
   } catch (error) {
     return res.status(500).json({
       error:

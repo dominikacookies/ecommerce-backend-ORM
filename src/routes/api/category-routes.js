@@ -65,10 +65,7 @@ router.post("/", async (req, res) => {
     }
 
     const newCategory = await Category.create(req.body);
-    return res.status(200).json({
-      message: "A new category has been successfully created",
-      category: newCategory,
-    });
+    return res.status(200).json(newCategory);
   } catch (error) {
     return res.status(500).json({
       error:
